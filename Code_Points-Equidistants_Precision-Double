@@ -1,0 +1,72 @@
+#include <stdio.h>      
+#include <math.h>       
+
+#define PI 3.14159265
+
+// Double precision - Points equidistants
+
+double fct1(double x)  // ici les fonctions que l'on va étudier
+{
+	return (3*x*x-2*x+7);
+}
+
+double fct2(double x)
+{
+	return (cos(x)+cos(2*x)+sin(3*x)+sin(4*x));
+}
+
+double fct3(double x)
+{
+	return (exp(x)*cos(5*x));
+}
+
+
+int main()
+{	
+	int i,j,k;
+	int tailleechantillon=3;                     // modifiable
+	double tab[tailleechantillon];	
+	double x[tailleechantillon];                 // ce tableau contient tous les abscisses des points que l'on se donne	
+	double alpha[tailleechantillon-1];           // ce tableau contient les abscisses des milieux entre chaque Xi.
+	double approxalpha[tailleechantillon-1];     // ce tableau contient l'approximation par l'algorithme de Neville
+
+	x[0]=-1;  // Ici on est dans le cas où on se place entre [-1;1] qu'on decoupe, ici on prend 3 points
+	x[1]=0;
+	x[2]=1;
+
+	for (i=1;i<tailleechantillon;i++)
+	{
+			alpha[i-1]=(x[i-1]+x[i])/2;  // Cette ligne remplît le tableau des milieux
+	}	
+	
+	for (k=0;k<tailleechantillon-1;k++)          // la bloucle des k correspond à celle des alphas, c'est à dire qu'un tour de k nous donne l'approximation pour un alpha particulier
+	{	
+		for (i=0;i<tailleechantillon;i++)    // cette boucle nous permet de réinitialiser tab après chaque approximation avec les valeurs initiales. 
+		{
+			tab[i]=fct3(x[i]);           // on sait que l'on a P(i,0) (x) = Yi = f(Xi)
+		}		
+		for (j=0;j<tailleechantillon-1;j++)  // Voir dans le rapport pour ces 2 boucles embriquées
+		{
+			for (i=0;i<(tailleechantillon-1-j);i++)
+			{
+				tab[i]=((x[i]-alpha[k])*tab[i+1]+(alpha[k]-x[i+j+1])*tab[i])/(x[i]-x[i+j+1]); 
+			}
+		}
+		approxalpha[k]=tab[0];               // la valeur obtenue est dans tab[0], on la stock dans approxalpha[k]
+		printf("la vrai valeur est %.15f, l'approx est %.15f \n",fct3(alpha[k]), approxalpha[k]); 	
+	}
+
+	double max=0;
+	double diff;
+	for (i=0;i<tailleechantillon-1;i++)
+	{
+		diff=fabs(fct3(alpha[i])-approxalpha[i]); // fabs(x) renvoie la valeur absolue
+		if (diff>max)
+		{
+			max=diff;                         // il s'agît bien de l'erreur tel que defini dans le sujet
+		}
+	}
+	printf("l'erreur est %.20f \n", max);
+
+	return 0;
+}
